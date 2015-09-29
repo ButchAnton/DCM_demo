@@ -2,10 +2,8 @@
 
 #include "HttpClient.h"
 #include "SparkTime.h"
-// #include <HttpClient/HttpClient.h>
-// #include <SparkTime/SparkTime.h>
 
-#define DEBUG
+// #define DEBUG
 
 // Data limits
 
@@ -34,20 +32,15 @@
 // The RTC code apparently doesn't deal with timezones, even though it says it does.  Therefore,
 // offset the value by our (GMT-7) timezone.
 
-#define TZ_OFFSET_IN_SECONDS (-7 * 60 * 60)
+#define TZ_OFFSET (-7)
+#define TZ_OFFSET_IN_SECONDS (TZ_OFFSET * 60 * 60)
 
 int potPin = 2;
 int dataVolume = 0;
 
-// unsigned int nextTime = 0;    // Next time to contact the server
-// String destination_url = "https://sapiotbcdfb1bb3.us1.hana.ondemand.com/sap/ocm/services/ocm.xsodata/usage";
-// char *server = "sapiotbcdfb1bb3.us1.hana.ondemand.com";
-// IPAddress server = {172,25,113,108};
 IPAddress server = {54,85,170,183};
-// int port = 8000;
 int port = 441;
 char *path = "/sap/ocm/services/ocm.xsodata/usage";
-// char *path = "/";
 HttpClient http;
 http_request_t request;
 http_response_t response;
@@ -62,6 +55,8 @@ http_header_t headers[] = {
 
 UDP UDPClient;
 SparkTime rtc;
+
+// Counter to keep track of when we need to POST to the web service.
 
 unsigned long timeToNextPost = 0;
 
@@ -94,60 +89,33 @@ void setup() {
   // Set up time.
 
   rtc.begin(&UDPClient);
-  rtc.setTimeZone(-8); // gmt offset
-}
-
-String toStringWithLeadingZero(unsigned int value) {
-    String returnValue = "";
-    if (value < 10) {
-        returnValue += "0";
-    }
-    returnValue += String(value);
-    return(returnValue);
-}
-
-// Return the time and date in the YYYY-MM-DDTHH:MM:SS
-String getTimeAndDate() {
-    unsigned long currentTime = rtc.now();
-    String time = "";
-    time += toStringWithLeadingZero(rtc.year(currentTime));
-    time +=  "-";
-    time += toStringWithLeadingZero(rtc.month(currentTime));
-    time +=  "-";
-    time += toStringWithLeadingZero(rtc.day(currentTime));
-    time +=  "T";
-    time += toStringWithLeadingZero(rtc.hour(currentTime));
-    time +=  ":";
-    time += toStringWithLeadingZero(rtc.minute(currentTime));
-    time +=  ":";
-    time += toStringWithLeadingZero(rtc.second(currentTime));
-    return(time);
+  rtc.setTimeZone(TZ_OFFSET); // GMT offset
 }
 
 void postToHana(int dataVolume) {
 
-    request.hostname = server;
-    request.port = port;
-    request.path = path;
-    unsigned long secondsSinceEpoch = rtc.now() - NTP_TIME_OFFSET_IN_SECONDS + TZ_OFFSET_IN_SECONDS;
-    // Add three zeros to the time value, which is the same thing as multiplying by 1000 to convert to milliseconds.
-    String body = "{ \"TIMESTAMP\": \"/Date(" + String(secondsSinceEpoch) + String("000") + ")/\", \"USAGE\": \"" + String(dataVolume) + "\" }";
-    request.body = body;
+  request.hostname = server;
+  request.port = port;
+  request.path = path;
+  unsigned long secondsSinceEpoch = rtc.now() - NTP_TIME_OFFSET_IN_SECONDS + TZ_OFFSET_IN_SECONDS;
+  // Add three zeros to the time value, which is the same thing as multiplying by 1000 to convert to milliseconds.
+  String body = "{ \"TIMESTAMP\": \"/Date(" + String(secondsSinceEpoch) + String("000") + ")/\", \"USAGE\": \"" + String(dataVolume) + "\" }";
+  request.body = body;
 #ifdef DEBUG
-    Serial.println("==================== Request body =======================");
-    Serial.println(body);
-    Serial.println("=================== End of request ======================");
-  #endif // DEBUG
+  Serial.println("==================== Request body =======================");
+  Serial.println(body);
+  Serial.println("=================== End of request ======================");
+#endif // DEBUG
 
-    http.post(request, response, headers);
+  http.post(request, response, headers);
 
 #ifdef DEBUG
-    Serial.println("=================== Response status =====================");
-    Serial.print("***** POST Response status: ");
-    Serial.println(response.status);
-    Serial.println("==================== Response body ======================");
-    Serial.println(response.body);
-    Serial.println("=================== End of response =====================");
+  Serial.println("=================== Response status =====================");
+  Serial.print("***** POST Response status: ");
+  Serial.println(response.status);
+  Serial.println("==================== Response body ======================");
+  Serial.println(response.body);
+  Serial.println("=================== End of response =====================");
 #endif // DEBUG
 }
 
@@ -181,7 +149,7 @@ void loop() {
 
   dataVolume = analogRead(potPin);
 
-  // In the pot I'm using, zero is all the way to the right, and full value
+  // With the pot I'm using, zero is all the way to the right, and full value
   // is immediate after the switch.  Invert these so that they make more sense.
   // Note that we have to have the high range of the pot for this calculation.
 
