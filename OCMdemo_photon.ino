@@ -207,6 +207,4 @@ void loop() {
     postToHana(dataVolume);
     timeToNextPost = millis() + DELAY_BETWEEN_POSTS;
   }
-
-  // delay(DELAY_BETWEEN_POSTS);
 }
