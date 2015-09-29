@@ -8,7 +8,7 @@
 // Data limits
 
 #define DATA_LIMIT 1000
-#define DATA_WARNING_THRESHOLD .8
+#define DATA_WARNING_THRESHOLD .70
 #define DATA_WARNING_LIMIT (DATA_LIMIT * DATA_WARNING_THRESHOLD)
 
 #define DELAY_BETWEEN_POSTS 5000    // miliseconds to wait between posts.
