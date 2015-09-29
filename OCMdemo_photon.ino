@@ -13,7 +13,7 @@
 #define DATA_WARNING_THRESHOLD .8
 #define DATA_WARNING_LIMIT (DATA_LIMIT * DATA_WARNING_THRESHOLD)
 
-#define DELAY_BETWEEN_POSTS 20000    // miliseconds to wait between posts.
+#define DELAY_BETWEEN_POSTS 5000    // miliseconds to wait between posts.
 
 // LED pins
 #define GREEN_LED 2
@@ -62,6 +62,8 @@ http_header_t headers[] = {
 
 UDP UDPClient;
 SparkTime rtc;
+
+unsigned long timeToNextPost = 0;
 
 void setup() {
 
@@ -201,7 +203,10 @@ void loop() {
     lightRedLED();
   }
 
-  postToHana(dataVolume);
+  if (millis() >= timeToNextPost) {
+    postToHana(dataVolume);
+    timeToNextPost = millis() + DELAY_BETWEEN_POSTS;
+  }
 
-  delay(DELAY_BETWEEN_POSTS);
+  // delay(DELAY_BETWEEN_POSTS);
 }
