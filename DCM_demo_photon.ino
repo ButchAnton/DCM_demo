@@ -48,7 +48,7 @@ http_header_t headers[] = {
     {"Content-Type", "application/json"},
     {"Accept" , "application/json" },
     {"Authorization", "Basic STgzMTUzMzpBYWFhMTIzNA=="},
-    {NULL, NULL} // NOTE: Always terminate headers will NULL
+    {NULL, NULL} // NOTE: Always terminate headers with NULL
 };
 
 // Time related
