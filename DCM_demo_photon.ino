@@ -11,7 +11,7 @@
 #define DATA_WARNING_THRESHOLD .70
 #define DATA_WARNING_LIMIT (DATA_LIMIT * DATA_WARNING_THRESHOLD)
 
-#define DELAY_BETWEEN_POSTS 5000    // miliseconds to wait between posts.
+#define DELAY_BETWEEN_POSTS 1000    // miliseconds to wait between posts.
 
 // LED pins
 #define GREEN_LED 2
