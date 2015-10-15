@@ -38,6 +38,7 @@
 int potPin = 2;
 int dataVolume = 0;
 
+// This is an HTTP/HTTPS converter hosted in AWS that forwards to the HCP instance.
 IPAddress server = {54,85,170,183};
 int port = 441;
 char *path = "/sap/ocm/services/ocm.xsodata/usage";
